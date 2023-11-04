@@ -1,10 +1,10 @@
 import { useState } from "react";
 
 function BookComponent({ data, key, moveBookToShelf }) {
-  const [selectedValue] = useState("");
+  const [selectedValue] = useState("none");
   const handleMoveToShelf = (event) => {
     // Call the moveBookToShelf function to move the book to the new shelf
-    this.props.moveBookToShelf(data, event.target.value);
+    moveBookToShelf(data, event.target.value);
   };
 
   return (

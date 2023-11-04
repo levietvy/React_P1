@@ -9,11 +9,10 @@ const ShelfComponent = ({ shelf, moveBookToShelf }) => {
           <ol className="books-grid">
             <li></li>
             <li>
-              {shelf.books.map((book, index) => (
+              {shelf.books.map((book) => (
                 <BookComponent
                   data={book}
                   key={book.id}
-                  index={index}
                   moveBookToShelf={moveBookToShelf}
                 />
               ))}

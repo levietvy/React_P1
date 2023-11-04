@@ -3,6 +3,12 @@ import { useState, useEffect } from "react";
 import { getAll } from "./BooksAPI";
 import SearchComponent from "./components/SearchComponent";
 import ShelfComponent from "./components/ShelfComponent";
+import {
+  BrowserRouter as Router,
+  Route,
+  Routes,
+  useNavigate,
+} from "react-router-dom";
 
 function App() {
   const [shelfs, setShelfs] = useState([
@@ -11,14 +17,24 @@ function App() {
     { name: "currentlyReading", books: [] },
   ]);
 
-  const [showSearchPage, setShowSearchpage] = useState(false);
-
+  const navigate = useNavigate();
   const handleShowSearch = () => {
-    setShowSearchpage(!showSearchPage);
+    navigate("/search");
   };
 
   const moveBookToShelf = (book, targetShelfName) => {
     const sourceShelfName = book.shelf;
+
+    if (sourceShelfName === undefined) {
+      const updatedTargetShelf = shelfs.find(
+        (shelf) => shelf.name === targetShelfName
+      );
+      book.shelf = updatedTargetShelf.name;
+      updatedTargetShelf.books.push(book);
+
+      setShelfs([...shelfs]);
+      return;
+    }
 
     if (sourceShelfName !== targetShelfName) {
       const updatedSourceShelf = shelfs.find(
@@ -31,6 +47,7 @@ function App() {
       const updatedTargetShelf = shelfs.find(
         (shelf) => shelf.name === targetShelfName
       );
+      book.shelf = updatedTargetShelf.name;
       updatedTargetShelf.books.push(book);
 
       setShelfs([...shelfs]);
@@ -65,31 +82,43 @@ function App() {
   }, []);
 
   return (
-    <div className="app">
-      {showSearchPage ? (
-        <SearchComponent onDataChange={handleShowSearch} />
-      ) : (
-        <div className="list-books">
-          <div className="list-books-title">
-            <h1>MyReads</h1>
-          </div>
-          <div className="list-books-content">
-            <div>
-              {shelfs.map((shelf, index) => (
-                <ShelfComponent
-                  shelf={shelf}
-                  key={index}
-                  moveBookToShelf={moveBookToShelf}
-                />
-              ))}
+    <Routes>
+      <Route
+        path="/search"
+        element={
+          <SearchComponent
+            onDataChange={handleShowSearch}
+            moveBookToShelf={moveBookToShelf}
+          />
+        }
+      />
+      <Route
+        path="/"
+        element={
+          <div className="app">
+            <div className="list-books">
+              <div className="list-books-title">
+                <h1>MyReads</h1>
+              </div>
+              <div className="list-books-content">
+                <div>
+                  {shelfs.map((shelf, index) => (
+                    <ShelfComponent
+                      shelf={shelf}
+                      key={index}
+                      moveBookToShelf={moveBookToShelf}
+                    />
+                  ))}
+                </div>
+              </div>
+              <div className="open-search">
+                <a onClick={handleShowSearch}>Add a book</a>
+              </div>
             </div>
           </div>
-          <div className="open-search">
-            <a onClick={handleShowSearch}>Add a book</a>
-          </div>
-        </div>
-      )}
-    </div>
+        }
+      />
+    </Routes>
   );
 }
 
