@@ -1,6 +1,6 @@
 import "./App.css";
 import { useState, useEffect } from "react";
-import { getAll } from "./BooksAPI";
+import { getAll, update } from "./BooksAPI";
 import SearchComponent from "./components/SearchComponent";
 import ShelfComponent from "./components/ShelfComponent";
 import {
@@ -25,12 +25,13 @@ function App() {
   const moveBookToShelf = (book, targetShelfName) => {
     const sourceShelfName = book.shelf;
 
-    if (sourceShelfName === undefined) {
+    if (sourceShelfName === "none") {
       const updatedTargetShelf = shelfs.find(
         (shelf) => shelf.name === targetShelfName
       );
       book.shelf = updatedTargetShelf.name;
-      updatedTargetShelf.books.push(book);
+      updatedTargetShelf.books = updatedTargetShelf.books.concat(book);
+      update(book, updatedTargetShelf.name);
 
       setShelfs([...shelfs]);
       return;
@@ -48,7 +49,8 @@ function App() {
         (shelf) => shelf.name === targetShelfName
       );
       book.shelf = updatedTargetShelf.name;
-      updatedTargetShelf.books.push(book);
+      updatedTargetShelf.books = updatedTargetShelf.books.concat(book);
+      update(book, updatedTargetShelf.name);
 
       setShelfs([...shelfs]);
     }
@@ -86,10 +88,7 @@ function App() {
       <Route
         path="/search"
         element={
-          <SearchComponent
-            onDataChange={handleShowSearch}
-            moveBookToShelf={moveBookToShelf}
-          />
+          <SearchComponent shelfs={shelfs} moveBookToShelf={moveBookToShelf} />
         }
       />
       <Route

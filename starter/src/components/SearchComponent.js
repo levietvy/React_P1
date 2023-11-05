@@ -1,11 +1,22 @@
 import React, { useState } from "react";
-import { search } from "../BooksAPI.js";
+import { search, get } from "../BooksAPI.js";
 import BookComponent from "./BookComponent.js";
 import { Link } from "react-router-dom";
 
-function SearchComponent({ onDataChange, moveBookToShelf }) {
+function SearchComponent({ shelfs, moveBookToShelf }) {
   const [books, setBooks] = useState([]);
   const [length, setLength] = useState(0);
+
+  function findShelfContainingBook(book, shelves) {
+    for (const shelf of shelves) {
+      const foundBook = shelf.books.find((b) => b.id === book.id);
+      if (foundBook) {
+        return shelf.name; // Return the name of the shelf where the book is found
+      }
+    }
+    return null; // Return null if the book is not found in any shelf
+  }
+
   const onSearchBook = async (query) => {
     if (query === "") {
       setLength(0);
@@ -15,6 +26,12 @@ function SearchComponent({ onDataChange, moveBookToShelf }) {
         setBooks([]);
         const results = await search(query, 0);
         if (!results.hasOwnProperty("error")) {
+          results.forEach(
+            (book) =>
+              (book.shelf = findShelfContainingBook(book, shelfs)
+                ? findShelfContainingBook(book, shelfs)
+                : "none")
+          );
           setBooks(results);
           setLength(results.length);
         }
@@ -43,11 +60,7 @@ function SearchComponent({ onDataChange, moveBookToShelf }) {
         ) : (
           <ol className="books-grid">
             {books.map((book) => (
-              <BookComponent
-                key={book.id}
-                data={book}
-                moveBookToShelf={moveBookToShelf}
-              />
+              <BookComponent data={book} moveBookToShelf={moveBookToShelf} />
             ))}
           </ol>
         )}
